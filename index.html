@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BehterCV - Resume Reviewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <style>
+        body { margin: 0; overflow-x: hidden; }
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e3a8a', // Deep Navy Blue
+                        accent: '#fbbc04', // Google Yellow/Orange
+                        darkbg: '#202124',
+                        lightbg: '#ffffff',
+                        cardLight: '#f8f9fa',
+                        cardDark: '#303134',
+                        textDark: '#202124',
+                        textLight: '#e8eaed'
+                    },
+                    keyframes: {
+                        shimmer: {
+                            '100%': { transform: 'translateX(100%)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-lightbg dark:bg-darkbg text-textDark dark:text-textLight transition-colors duration-300 min-h-screen flex flex-col relative font-sans">
+
+    <div id="canvas-container"></div>
+
+    <!-- Header -->
+    <header class="w-full p-4 flex justify-between items-center z-10 max-w-7xl mx-auto">
+        <div class="flex items-center gap-3">
+            <span class="text-3xl font-bold tracking-tight">
+                <span class="text-primary dark:text-blue-400">Behter</span><span class="text-accent">CV</span>
+            </span>
+        </div>
+        <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none" aria-label="Toggle Dark Mode">
+            <!-- Sun Icon -->
+            <svg id="sun-icon" class="w-6 h-6 hidden dark:block text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <!-- Moon Icon -->
+            <svg id="moon-icon" class="w-6 h-6 block dark:hidden text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        </button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center justify-center px-4 py-4 z-10 w-full mx-auto">
+        
+        <div id="input-section" class="w-full max-w-4xl flex flex-col items-center">
+            <!-- Hero Text -->
+            <div class="text-center mb-6">
+                <h1 class="text-3xl md:text-5xl font-bold mb-3 tracking-tight">Make Your Resume <span class="text-primary dark:text-blue-400">Behtereeen.</span></h1>
+                <p class="text-base md:text-lg opacity-80 max-w-2xl mx-auto leading-relaxed">
+                    Stop guessing what recruiters want. Upload your CV and the Job Description to get hyper-targeted, line-by-line feedback that actually lands interviews.
+                </p>
+            </div>
+
+            <!-- Input Card -->
+            <div class="w-full max-w-4xl rounded-2xl p-[4px] bg-[linear-gradient(90deg,#4285F4,#0F9D58,#F4B400,#DB4437)] shadow-2xl">
+                <div class="w-full h-full bg-cardLight dark:bg-cardDark rounded-xl p-6 transition-colors duration-300">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Company Name -->
+                    <div class="md:col-span-2">
+                        <label for="company" class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Company Name</label>
+                        <input type="text" id="company" placeholder="e.g. Amazon, Google, Microsoft" 
+                            class="w-full px-4 py-3 rounded-lg border border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm focus:ring-2 focus:ring-primary dark:focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-500 dark:placeholder-gray-500">
+                    </div>
+
+                    <!-- Job Description -->
+                    <div class="h-full flex flex-col">
+                        <label for="job-desc" class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Job Description</label>
+                        <textarea id="job-desc" placeholder="Paste the complete job description here"
+                            class="w-full flex-grow px-4 py-3 rounded-lg border border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm focus:ring-2 focus:ring-primary dark:focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none placeholder-gray-500 dark:placeholder-gray-500 min-h-[160px]"></textarea>
+                    </div>
+
+                    <!-- Resume Upload -->
+                    <div class="h-full flex flex-col">
+                        <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Resume Upload</label>
+                        <div class="relative flex-grow border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary dark:hover:border-blue-400 transition-colors cursor-pointer bg-white dark:bg-gray-800 shadow-sm group flex flex-col items-center justify-center min-h-[160px]">
+                            <input type="file" id="resume-file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf">
+                            <div class="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-primary dark:group-hover:text-blue-400 transition-colors">
+                                <svg class="w-10 h-10 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                <span class="text-base font-medium">Click to upload resume</span>
+                                <span class="text-xs mt-1 opacity-70">PDF only, up to 10MB</span>
+                                <span id="file-name" class="text-sm font-semibold mt-2 text-primary dark:text-blue-400 hidden"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CTA Button -->
+                    <div class="md:col-span-2">
+                        <button id="analyze-btn" class="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 hover:from-blue-500 hover:via-blue-600 hover:to-indigo-700 text-white font-bold py-4 px-4 rounded-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:scale-[0.98] text-lg tracking-wide relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span id="btn-text" class="relative z-10">Analyze Resume</span>
+                            <div class="absolute inset-0 h-full w-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                        </button>
+                    </div>
+                </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="w-full max-w-7xl hidden flex flex-col">
+            <button id="back-btn" class="self-start mb-6 px-5 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200 group">
+                <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back to Upload
+            </button>
+            <div id="results-content"></div>
+        </div>
+    </main>
+
+    <script>
+        // Analysis Renderer Function
+        function renderAnalysis(data) {
+            // Helper for status colors
+            const getStatusColor = (status) => {
+                if (status === 'pass') return 'bg-green-500';
+                if (status === 'warn') return 'bg-orange-500';
+                return 'bg-red-500';
+            };
+            
+            const getScoreColor = (score) => {
+                if (score.includes('+')) return 'text-green-600 dark:text-green-400';
+                return 'text-red-600 dark:text-red-400';
+            };
+
+            // 1. Left Sidebar: Scores & Checklist
+            let sidebarHtml = `
+                <div class="col-span-1 space-y-6">
+                    <!-- Overall Score Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
+                        <div class="relative w-32 h-32 mx-auto mb-4">
+                            <svg class="w-full h-full transform -rotate-90">
+                                <circle cx="64" cy="64" r="56" stroke="currentColor" stroke-width="8" fill="transparent" class="text-gray-100 dark:text-gray-700" />
+                                <circle cx="64" cy="64" r="56" stroke="currentColor" stroke-width="8" fill="transparent" stroke-dasharray="351.86" stroke-dashoffset="${351.86 - (351.86 * data.match_score / 100)}" class="text-primary dark:text-blue-500 transition-all duration-1000 ease-out" />
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-4xl font-bold text-gray-900 dark:text-white">${data.match_score}%</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">Match</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Sub Scores -->
+                        <div class="grid grid-cols-3 gap-2 border-t border-gray-100 dark:border-gray-700 pt-4 mt-2">
+                            <div class="text-center">
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Structure</div>
+                                <div class="font-bold text-gray-800 dark:text-gray-200">${data.sub_scores?.structure?.score || 0}/${data.sub_scores?.structure?.max || 20}</div>
+                            </div>
+                            <div class="text-center border-l border-r border-gray-100 dark:border-gray-700">
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Content</div>
+                                <div class="font-bold text-gray-800 dark:text-gray-200">${data.sub_scores?.content?.score || 0}/${data.sub_scores?.content?.max || 60}</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Tailoring</div>
+                                <div class="font-bold text-gray-800 dark:text-gray-200">${data.sub_scores?.tailoring?.level || '-'}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Checklist -->
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        ${data.checklist ? data.checklist.map(category => `
+                            <div class="border-b border-gray-100 dark:border-gray-700 last:border-0">
+                                <div class="px-6 py-3 bg-gray-50 dark:bg-gray-900/50 font-semibold text-sm text-gray-700 dark:text-gray-300">
+                                    ${category.category}
+                                </div>
+                                <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                                    ${category.items.map(item => `
+                                        <div class="px-6 py-4 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                            <div class="mt-1.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ${getStatusColor(item.status)}"></div>
+                                            <div class="flex-grow">
+                                                <div class="flex justify-between items-center mb-1">
+                                                    <span class="font-medium text-gray-900 dark:text-white text-sm">${item.name}</span>
+                                                    <span class="text-xs font-bold ${getScoreColor(item.score)}">${item.score}</span>
+                                                </div>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">${item.detail}</p>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('') : ''}
+                    </div>
+                </div>
+            `;
+
+            // 2. Right Panel: Annotated Resume
+            let resumeHtml = '';
+            if (data.annotated_resume) {
+                let text = data.annotated_resume;
+                text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+                // Markdown Formatting
+                
+                // Headers (### Title) -> Clean Serif Headers
+                text = text.replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold text-gray-900 mt-8 mb-4 border-b border-gray-300 pb-2 uppercase tracking-wide font-serif">$1</h3>');
+                
+                // Bold (**text**)
+                text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>');
+                
+                // Bullets (- text)
+                text = text.replace(/^[\-\*] (.*$)/gim, '<div class="flex items-start gap-3 mb-2 ml-4"><span class="mt-2.5 w-1.5 h-1.5 rounded-full bg-gray-800 flex-shrink-0"></span><span class="leading-relaxed">$1</span></div>');
+
+                // Improvements: <<<Content>>> -> Yellow Highlight with Icon
+                text = text.replace(/&lt;&lt;&lt;(.*?)&gt;&gt;&gt;/gs, 
+                    `<span class="group relative inline-block">
+                        <span class="absolute -left-6 top-0.5 hidden group-hover:block md:block">
+                            <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                        </span>
+                        <span class="bg-yellow-100 text-gray-900 px-1 rounded border-b-2 border-yellow-300 cursor-help">$1</span>
+                        <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 shadow-lg font-sans pointer-events-none">Needs Improvement</span>
+                    </span>`);
+
+                // Removals: ~~~Content~~~ -> Red Strikethrough with Icon
+                text = text.replace(/~~~(.*?)~~~/gs, 
+                    `<span class="group relative inline-block">
+                        <span class="absolute -left-6 top-0.5 hidden group-hover:block md:block">
+                            <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                        </span>
+                        <span class="bg-red-50 text-gray-500 line-through decoration-red-500 decoration-2 px-1 rounded cursor-help">$1</span>
+                        <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 shadow-lg font-sans pointer-events-none">Suggested Removal</span>
+                    </span>`);
+
+                // Additions: +++Content+++ -> Green Block
+                text = text.replace(/\+\+\+(.*?)\+\+\+/gs, 
+                    `<div class="my-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-r shadow-sm flex gap-3">
+                        <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        <div>
+                            <div class="font-bold text-green-800 text-xs uppercase tracking-wider mb-1 font-sans">Suggested Addition</div>
+                            <div class="text-green-900 text-sm italic font-serif">$1</div>
+                        </div>
+                    </div>`);
+
+                resumeHtml = `
+                    <div class="col-span-1 md:col-span-2">
+                        <div class="bg-gray-100 dark:bg-gray-900/50 rounded-2xl p-1 h-full flex flex-col">
+                            <!-- Paper Container -->
+                            <div class="bg-white text-gray-900 font-serif rounded-lg shadow-xl overflow-hidden h-full flex flex-col max-w-[210mm] mx-auto w-full">
+                                <!-- Header (Paper Top) -->
+                                <div class="px-8 py-6 border-b border-gray-200 bg-white flex justify-between items-center">
+                                    <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2 font-sans">
+                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        Annotated Resume
+                                    </h2>
+                                    <div class="flex gap-2 text-[10px] font-bold uppercase tracking-wider font-sans">
+                                        <span class="flex items-center gap-1 px-2 py-1 rounded bg-yellow-100 text-yellow-800 border border-yellow-200">Improve</span>
+                                        <span class="flex items-center gap-1 px-2 py-1 rounded bg-red-100 text-red-800 border border-red-200">Remove</span>
+                                        <span class="flex items-center gap-1 px-2 py-1 rounded bg-green-100 text-green-800 border border-green-200">Add</span>
+                                    </div>
+                                </div>
+                                <!-- Paper Content -->
+                                <div class="p-10 md:p-12 text-base leading-7 overflow-y-auto min-h-[800px]">
+                                    ${text}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                    ${sidebarHtml}
+                    ${resumeHtml}
+                </div>
+            `;
+        }
+
+        // File Upload Handling
+        const fileInput = document.getElementById('resume-file');
+        const fileNameDisplay = document.getElementById('file-name');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const btnText = document.getElementById('btn-text');
+        const inputSection = document.getElementById('input-section');
+        const resultsSection = document.getElementById('results-section');
+        const resultsContent = document.getElementById('results-content');
+        const backBtn = document.getElementById('back-btn');
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileNameDisplay.textContent = e.target.files[0].name;
+                fileNameDisplay.classList.remove('hidden');
+            } else {
+                fileNameDisplay.classList.add('hidden');
+            }
+        });
+
+        // Back Button Logic
+        backBtn.addEventListener('click', () => {
+            resultsSection.classList.add('hidden');
+            inputSection.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Analyze Button Logic
+        analyzeBtn.addEventListener('click', async () => {
+            const company = document.getElementById('company').value;
+            const jobDesc = document.getElementById('job-desc').value;
+            const resumeFile = fileInput.files[0];
+
+            // Validation
+            if (!jobDesc) {
+                alert('Please enter a Job Description.');
+                return;
+            }
+            if (!resumeFile) {
+                alert('Please upload a Resume (PDF).');
+                return;
+            }
+            if (resumeFile.type !== 'application/pdf') {
+                alert('Only PDF files are allowed.');
+                return;
+            }
+
+            // Loading State
+            analyzeBtn.disabled = true;
+            btnText.textContent = 'Analyzing...';
+            
+            const formData = new FormData();
+            formData.append('company_name', company);
+            formData.append('job_description', jobDesc);
+            formData.append('resume_pdf', resumeFile);
+
+            try {
+                const response = await fetch('http://localhost:8000/analyze-resume', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Analysis failed');
+                }
+
+                const data = await response.json();
+                
+                // Display Results
+                resultsContent.innerHTML = renderAnalysis(data);
+                
+                // Switch Views
+                inputSection.classList.add('hidden');
+                resultsSection.classList.remove('hidden');
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                analyzeBtn.disabled = false;
+                btnText.textContent = 'Analyze Resume';
+            }
+        });
+
+        // Theme Toggle Logic
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+
+        // Check local storage or system preference
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlElement.classList.add('dark');
+        } else {
+            htmlElement.classList.remove('dark');
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark');
+            if (htmlElement.classList.contains('dark')) {
+                localStorage.theme = 'dark';
+            } else {
+                localStorage.theme = 'light';
+            }
+            updateParticlesColor();
+        });
+
+        // Three.js Background Logic
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        // Particles
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 1500;
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for(let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 15; // Spread
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        // Material
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.025,
+            color: 0x1e3a8a, // Initial color (Navy)
+            transparent: true,
+            opacity: 0.8,
+            sizeAttenuation: true
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        camera.position.z = 3;
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Update particle color based on theme
+        function updateParticlesColor() {
+            if (htmlElement.classList.contains('dark')) {
+                particlesMaterial.color.setHex(0xffffff); // White stars in dark mode
+            } else {
+                particlesMaterial.color.setHex(0x1e3a8a); // Navy stars in light mode
+            }
+        }
+        
+        // Initial color set
+        updateParticlesColor();
+
+        // Animation Loop
+        const clock = new THREE.Clock();
+
+        const tick = () => {
+            const elapsedTime = clock.getElapsedTime();
+
+            // Rotate entire system slowly
+            particlesMesh.rotation.y = .05 * elapsedTime;
+            particlesMesh.rotation.x = .02 * elapsedTime;
+
+            renderer.render(scene, camera);
+            window.requestAnimationFrame(tick);
+        }
+
+        tick();
+    </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+Detailed Prompt for Front-End Generation
+"Generate a complete, single-file HTML, CSS, and JavaScript web application for the BehterCV resume reviewer landing page.
+
+The application must be fully functional and designed for optimal user experience, incorporating the following requirements:
+
+I. Visual & Structural Requirements (Based on Figma Prototype)
+Layout: Replicate the layout of the provided Figma screenshot, which features a central, contained input card.
+
+Header:
+
+Left side: Display the logo and name "BehterCV".
+
+Right side: Include a prominent, clickable Theme Toggle Button (icon suggestions: ☀️ or similar professional icons) for switching between Light and Dark mode.
+
+Hero Text: Display the following copy centered above the input card:
+
+Headline: Make Your Resume Behtereeen.
+
+Sub-text: Stop guessing what recruiters want. Upload your CV and the Job Description to get hyper-targeted, line-by-line feedback that actually lands interviews.
+
+Input Card:
+
+The card must be centrally located and utilize a professional, light background color (in Light Mode) or dark background color (in Dark Mode).
+
+Include three required input fields with appropriate labels and placeholders:
+
+Label: Company Name
+
+Placeholder: e.g. Amazon, Google, Microsoft
+
+Label: Job Description
+
+Placeholder: Paste the complete job description here
+
+Label: Resume Upload
+
+Input Type: A custom-styled file upload area (not a standard button) with the text: Click to upload resume.
+
+Call to Action: A primary, full-width button at the bottom of the card with the text: Analyze Resume.
+
+II. Technical & Aesthetic Requirements
+Responsiveness (Mobile-First): The layout must be fully responsive for all device sizes (desktop, tablet, mobile). Use flexible units (%, vw) and Tailwind CSS utility classes (loaded via CDN) to ensure the central card scales appropriately and the entire page prevents horizontal scrolling.
+
+Color Palette: Use a professional, non-neon color palette, similar to Google's primary colors (blues, professional grays, subtle accents) to convey trust and authority. The primary colors should be: Deep Navy Blue for primary elements and a professional Orange/Yellow accent.
+
+Theme Toggle Functionality (Light/Dark Mode):
+
+Implement JavaScript logic to toggle a class (e.g., dark-mode) on the <body> element.
+
+The default mode should be Light Mode.
+
+Ensure all UI elements (text, card background, input fields) automatically adjust their colors when the mode is switched.
+
+Three.js Background:
+
+Implement a Three.js scene as the background for the entire application.
+
+Stars: The scene must contain a dynamic field of small, white or blue particles/stars.
+
+Cursor Interaction (Antigravity Effect): The stars must react to the user's cursor position. As the mouse moves, the stars closest to the cursor should be subtly repelled or pushed away, mimicking the dynamic background effect seen on Google's "Antigravity" site. This effect must be smooth and performant.
+
+III. Deliverables
+Provide the complete, self-contained HTML file (including all CSS within <style> tags or using Tailwind, and all JavaScript logic within <script> tags, including the Three.js implementation)."
