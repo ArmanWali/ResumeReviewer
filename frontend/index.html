@@ -473,8 +473,8 @@
             const elapsedTime = clock.getElapsedTime();
 
             // Rotate entire system slowly
-            particlesMesh.rotation.y = .05 * elapsedTime;
-            particlesMesh.rotation.x = .02 * elapsedTime;
+            particlesMesh.rotation.y = .01 * elapsedTime;
+            particlesMesh.rotation.x = .005 * elapsedTime;
 
             renderer.render(scene, camera);
             window.requestAnimationFrame(tick);
