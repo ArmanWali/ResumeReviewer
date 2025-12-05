@@ -355,8 +355,13 @@
             formData.append('job_description', jobDesc);
             formData.append('resume_pdf', resumeFile);
 
+            // API URL Configuration
+            // For local development: http://localhost:8000/analyze-resume
+            // For production: Replace with your Render backend URL
+            const API_URL = 'http://localhost:8000/analyze-resume'; 
+
             try {
-                const response = await fetch('http://localhost:8000/analyze-resume', {
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     body: formData
                 });
