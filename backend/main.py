@@ -163,7 +163,7 @@ async def analyze_resume(
     # 5. Call Gemini API
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash-lite-preview-02-05", contents=prompt
+            model="gemini-2.5-flash", contents=prompt
         )
         
         # Clean and Parse JSON
